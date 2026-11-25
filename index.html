@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبرد مدیریت پروژه | مجتمع مسکونی آفتاب</title>
+    <!-- بارگذاری فونت وزیرمتن برای تایپوگرافی استاندارد فارسی -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <!-- بارگذاری Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- بارگذاری آیکون‌های Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- بارگذاری کتابخانه Chart.js برای نمودارهای دقیق -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- بارگذاری کتابخانه SheetJS برای خواندن و تولید فایل اکسل چندشیتی -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#103452',
+                            900: '#0b253c',
+                            950: '#071929',
+                        },
+                        amberbrand: {
+                            400: '#ffaa1d',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        },
+                        surface: '#f1f4f8'
+                    },
+                    boxShadow: {
+                        'card': '0 10px 25px -5px rgba(11, 37, 60, 0.06), 0 4px 10px -2px rgba(11, 37, 60, 0.03)',
+                        'card-hover': '0 14px 30px -5px rgba(11, 37, 60, 0.12)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #d8dfe8;
+            color: #1e293b;
+        }
+        /* اسکرول‌بار سفارشی */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.12);
+            border-right: 4px solid #ffaa1d;
+            color: #ffffff;
+        }
+        /* استایل بُعد حداقلی (3D Depth) و درخشش نئون فیروزه‌ای برای کارت‌های KPI */
+        .kpi-neon-card {
+            position: relative;
+            border: 1.5px solid rgba(6, 182, 212, 0.75);
+            box-shadow:
+                0 12px 24px -6px rgba(11, 37, 60, 0.18),
+                0 4px 10px -2px rgba(11, 37, 60, 0.1),
+                0 0 18px rgba(34, 211, 238, 0.45),
+                inset 0 1px 1px rgba(255, 255, 255, 0.55);
+            transform: translateY(-2px);
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .kpi-neon-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: #22d3ee;
+            box-shadow:
+                0 18px 32px -8px rgba(11, 37, 60, 0.25),
+                0 0 28px rgba(34, 211, 238, 0.75),
+                inset 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+        .kpi-neon-card-dark {
+            box-shadow:
+                0 14px 28px -6px rgba(7, 25, 41, 0.45),
+                0 0 22px rgba(34, 211, 238, 0.55),
+                inset 0 1px 1px rgba(103, 232, 249, 0.35);
+        }
+        .kpi-neon-card-dark:hover {
+            box-shadow:
+                0 20px 36px -8px rgba(7, 25, 41, 0.55),
+                0 0 32px rgba(34, 211, 238, 0.85),
+                inset 0 1px 2px rgba(165, 243, 252, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-0 sm:p-4 md:p-6 lg:p-8 flex items-center justify-center">
+
+    <!-- چیدمان اصلی شامل داشبرد (سمت راست) و پنل آپلود عکس و مدیا در فضای سمت چپ -->
+    <div class="w-full max-w-[1820px] flex flex-col 2xl:flex-row gap-6 items-stretch justify-center">
+
+        <!-- کانتینر اصلی داشبرد (سمت راست در زبان فارسی) -->
+        <div class="w-full 2xl:flex-1 bg-surface sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row min-h-[850px] border border-white/60">
+
+            <!-- منوی کناری (Sidebar) - سرمه‌ای تیره مطابق تصویر -->
+            <aside class="w-full lg:w-72 bg-navy-900 text-white flex flex-col justify-between shrink-0">
+                <div>
+                    <div class="p-6 pb-8 flex flex-col items-center text-center border-b border-white/10">
+                        <!-- آواتار دایره‌ای با سایه عمیق مطابق تصویر -->
+                        <div class="w-24 h-24 rounded-full bg-navy-950 shadow-[0_8px_20px_rgba(0,0,0,0.45)] flex items-center justify-center mb-4 border-4 border-navy-800 relative">
+                            <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-navy-900">
+                                <i data-lucide="building-2" class="w-9 h-9 stroke-[2.2]"></i>
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-5 h-5 bg-emerald-400 border-2 border-navy-900 rounded-full" title="پروژه فعال"></span>
+                        </div>
+                        <h2 class="text-lg font-bold tracking-tight text-white">مجتمع مسکونی آفتاب</h2>
+                        <p class="text-xs text-slate-300 mt-1">مدیر: مهندس رضا کریمی</p>
+                        <span class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-amberbrand-400/20 text-amberbrand-400 border border-amberbrand-400/30">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amberbrand-400 animate-pulse"></span>
+                            در حال اجرا (کد ۱۰۱)
+                        </span>
+                    </div>
+
+                    <!-- لینک‌های ناوبری -->
+                    <nav class="py-4 px-3 space-y-1.5">
+                        <button onclick="switchTab('overview')" data-tab="overview" class="nav-item active w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/10 transition text-right">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5 text-amberbrand-400"></i>
+                            <span>داشبرد و نمای کلی</span>
+                        </button>
+                        <button onclick="switchTab('phases')" data-tab="phases" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/10 transition text-right">
+                            <i data-lucide="layers" class="w-5 h-5 text-slate-300"></i>
+                            <span>فازهای پروژه (۷ فاز)</span>
+                        </button>
+                        <button onclick="switchTab('tasks')" data-tab="tasks" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/10 transition text-right">
+                            <i data-lucide="check-square" class="w-5 h-5 text-slate-300"></i>
+                            <span>فعالیت‌ها و پیشرفت</span>
+                        </button>
+                        <button onclick="switchTab('materials')" data-tab="materials" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/10 transition text-right">
+                            <i data-lucide="package" class="w-5 h-5 text-slate-300"></i>
+                            <span>مصالح و برآورد مالی</span>
+                        </button>
+                        <button onclick="switchTab('inspections')" data-tab="inspections" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/10 transition text-right">
+                            <i data-lucide="clipboard-check" class="w-5 h-5 text-slate-300"></i>
+                            <span>بازرسی و کنترل کیفیت</span>
+                        </button>
+                        <button onclick="switchTab('team')" data-tab="team" class="nav-item w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-slate-200 hover:bg-white/10 transition text-right">
+                            <i data-lucide="users" class="w-5 h-5 text-slate-300"></i>
+                            <span>تیم اجرایی و پیمانکاران</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- اطلاعات خلاصه کارفرما در پایین سایدبار -->
+                <div class="p-5 m-4 rounded-xl bg-navy-950/70 border border-white/10 text-xs space-y-2">
+                    <div class="flex items-center gap-2 text-slate-400">
+                        <i data-lucide="briefcase" class="w-4 h-4 text-amberbrand-400 shrink-0"></i>
+                        <span>کارفرما:</span>
+                    </div>
+                    <p class="font-semibold text-white pr-6">شرکت توسعه عمران پارس</p>
+                    <div class="flex items-center gap-2 text-slate-400 pt-1">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-amberbrand-400 shrink-0"></i>
+                        <span>موقعیت پروژه:</span>
+                    </div>
+                    <p class="font-semibold text-white pr-6">تهران، سعادت‌آباد</p>
+                    <div class="pt-2 border-t border-white/10 flex justify-between text-[11px] text-slate-400">
+                        <span>شروع: ۱۴۰۳/۰۱/۱۵</span>
+                        <span>پایان: ۱۴۰۵/۰۶/۳۰</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- بخش اصلی محتوای داشبرد -->
+            <main class="flex-1 p-5 sm:p-7 lg:p-8 overflow-y-auto">
+
+                <!-- هدر بالایی مطابق تصویر -->
+                <header class="flex flex-wrap items-center justify-between gap-4 mb-7">
+                    <div>
+                        <h1 id="page-title" class="text-xl sm:text-2xl font-bold text-navy-900">داشبرد مدیریت پروژه</h1>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-1">پایش لحظه‌ای فازها، فعالیت‌ها، مصالح و بازرسی‌های فنی مجتمع مسکونی آفتاب</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <!-- دکمه دانلود تمپلیت اکسل استاندارد -->
+                        <button onclick="downloadDataTemplate()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-card hover:shadow-card-hover transition">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                            <span>دانلود تمپلیت دیتا</span>
+                        </button>
+                        <!-- دکمه آپلود دیتای جدید (Excel یا JSON) -->
+                        <button onclick="document.getElementById('dashboard-data-upload').click()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amberbrand-400 hover:bg-amberbrand-500 text-white text-xs font-semibold shadow-card hover:shadow-card-hover transition">
+                            <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                            <span>آپلود دیتای جدید</span>
+                        </button>
+                        <input id="dashboard-data-upload" type="file" accept=".xlsx,.xls,.json" class="hidden" onchange="handleDashboardDataUpload(event)">
+
+                        <button onclick="openProjectDetailsModal()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white text-navy-900 text-xs font-semibold shadow-card hover:shadow-card-hover transition border border-slate-100">
+                            <i data-lucide="info" class="w-4 h-4 text-amberbrand-500"></i>
+                            <span>شناسنامه پروژه</span>
+                        </button>
+                        <button onclick="toggleQuickMenu()" class="p-2.5 rounded-xl bg-white text-navy-900 shadow-card hover:bg-slate-50 transition border border-slate-100" title="جزئیات قرارداد">
+                            <i data-lucide="menu" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- نوار پیام وضعیت عملیات بارگذاری/دانلود دیتا -->
+                <div id="data-toast" class="hidden mb-5 px-4 py-3 rounded-xl text-xs font-semibold flex items-center justify-between border shadow-sm transition-all"></div>
+
+                <!-- ========================================================= -->
+                <!-- نمای ۱: داشبرد اصلی (مطابق دقیق چیدمان تصویر ارسالی) -->
+                <!-- ========================================================= -->
+                <div id="view-overview" class="space-y-6">
+
+                    <!-- ردیف اول: ۴ کارت شاخص کلیدی (KPI) با بُعد حداقلی و نور نئون فیروزه‌ای -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+                        <!-- کارت ۱: سرمه‌ای تیره مطابق تصویر -->
+                        <div class="kpi-neon-card kpi-neon-card-dark bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950 text-white rounded-2xl p-5 flex flex-col justify-between">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium text-slate-300">بودجه کل پروژه</span>
+                                <div class="w-9 h-9 rounded-full bg-white text-navy-900 flex items-center justify-center shadow">
+                                    <i data-lucide="banknote" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <div id="kpi-budget-toman" class="text-2xl sm:text-3xl font-extrabold tracking-tight">۸۵ <span class="text-sm font-normal text-amberbrand-400">میلیارد تومان</span></div>
+                                <div id="kpi-budget-rial" class="text-[11px] text-slate-300 mt-1">معادل ۸۵۰,۰۰۰,۰۰۰,۰۰۰ ریال</div>
+                            </div>
+                        </div>
+
+                        <!-- کارت ۲: هزینه کل مصالح برآوردی -->
+                        <div class="kpi-neon-card bg-gradient-to-b from-white to-slate-50/90 rounded-2xl p-5 flex flex-col justify-between">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-500">هزینه کل مصالح اصلی</span>
+                                <div class="w-9 h-9 rounded-full bg-amberbrand-400/15 text-amberbrand-500 flex items-center justify-center">
+                                    <i data-lucide="layers" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <div id="kpi-materials-cost" class="text-2xl sm:text-3xl font-extrabold text-navy-900">۱۹.۱۳ <span class="text-sm font-medium text-slate-500">میلیارد تومان</span></div>
+                                <div id="kpi-materials-ratio" class="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
+                                    <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                                    <span>۲۲.۵٪ از بودجه کل پروژه</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- کارت ۳: وضعیت فازها -->
+                        <div class="kpi-neon-card bg-gradient-to-b from-white to-slate-50/90 rounded-2xl p-5 flex flex-col justify-between">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-500">فازهای تکمیل شده</span>
+                                <div class="w-9 h-9 rounded-full bg-amberbrand-400/15 text-amberbrand-500 flex items-center justify-center">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <div id="kpi-phases-count" class="text-2xl sm:text-3xl font-extrabold text-navy-900">۳ <span class="text-sm font-medium text-slate-500">از ۷ فاز</span></div>
+                                <div id="kpi-active-phase" class="text-[11px] text-amberbrand-600 font-medium mt-1">فاز ۴ (اسکلت) در حال اجرا</div>
+                            </div>
+                        </div>
+
+                        <!-- کارت ۴: نرخ تایید بازرسی‌ها -->
+                        <div class="kpi-neon-card bg-gradient-to-b from-white to-slate-50/90 rounded-2xl p-5 flex flex-col justify-between">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-500">نتایج بازرسی فنی</span>
+                                <div class="w-9 h-9 rounded-full bg-amberbrand-400/15 text-amberbrand-500 flex items-center justify-center">
+                                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                            <div class="my-4">
+                                <div id="kpi-inspections-rate" class="text-2xl sm:text-3xl font-extrabold text-navy-900">۱۰۰٪ <span class="text-sm font-medium text-emerald-600">تایید</span></div>
+                                <div id="kpi-inspections-detail" class="text-[11px] text-slate-500 mt-1">۲ بازرسی پاس شده • ۱ در انتظار</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ردیف دوم و سوم: گرید نامتقارن مطابق تصویر (۲ ستون چپ برای نمودارها، ۱ ستون راست برای دونات پیشرفت کل) -->
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+                        <!-- ستون راست (۲ واحد عرض): نمودار میله‌ای + نمودار موجی و تقویم -->
+                        <div class="xl:col-span-2 space-y-6">
+
+                            <!-- کارت نمودار میله‌ای (Result) مطابق تصویر -->
+                            <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100/80">
+                                <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                                    <div>
+                                        <h3 class="text-base font-bold text-navy-900">پیشرفت فعالیت‌ها و هزینه مصالح</h3>
+                                        <p class="text-xs text-slate-400 mt-0.5">مقایسه درصد پیشرفت فعالیت‌های اجرایی (کد ۳۰۱ تا ۳۰۵)</p>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex items-center gap-3 text-xs">
+                                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-xs bg-amberbrand-400 inline-block"></span> برنامه‌ریزی شده</span>
+                                            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-xs bg-navy-900 inline-block"></span> پیشرفت واقعی</span>
+                                        </div>
+                                        <button onclick="switchTab('tasks')" class="px-4 py-1.5 rounded-full bg-amberbrand-400 hover:bg-amberbrand-500 text-white text-xs font-semibold shadow-sm transition">
+                                            مشاهده جزئیات
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="h-60 w-full">
+                                    <canvas id="tasksBarChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- کارت ترکیبی پایین: نمودار موجی مصالح + تقویم رویدادهای کلیدی مطابق تصویر -->
+                            <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100/80 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                                <!-- بخش نمودار موجی -->
+                                <div class="md:col-span-7">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="space-y-1">
+                                            <div class="flex items-center gap-2 text-xs font-semibold text-navy-900">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-amberbrand-400"></span>
+                                                <span>سهم ریالی مصالح (میلیارد ریال)</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs text-slate-400">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-navy-900"></span>
+                                                <span>توزیع تجمعی تدارکات</span>
+                                            </div>
+                                        </div>
+                                        <span class="text-[11px] font-bold bg-slate-100 text-navy-800 px-2.5 py-1 rounded-lg">۱۹۱.۳ میلیارد ریال</span>
+                                    </div>
+                                    <div class="h-44 w-full">
+                                        <canvas id="materialsWaveChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <!-- بخش تقویم مینیاتوری نقاط عطف پروژه مطابق تصویر -->
+                                <div class="md:col-span-5 border-t md:border-t-0 md:border-r border-slate-100 pt-4 md:pt-0 md:pr-5">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-xs font-bold text-navy-900">تقویم نقاط عطف پروژه</span>
+                                        <span class="text-[11px] text-amberbrand-600 font-semibold bg-amberbrand-400/15 px-2 py-0.5 rounded">۱۴۰۳ - ۱۴۰۵</span>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-slate-400 mb-2">
+                                        <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span class="text-rose-400">ج</span>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-1.5 text-center text-[11px] font-semibold">
+                                        <span class="py-1 text-slate-300">۲۹</span>
+                                        <span class="py-1 text-slate-300">۳۰</span>
+                                        <span class="py-1 text-slate-600">۱</span>
+                                        <span class="py-1 text-slate-600">۲</span>
+                                        <span class="py-1 text-slate-600">۳</span>
+                                        <span class="py-1 text-slate-600">۴</span>
+                                        <span class="py-1 text-slate-600">۵</span>
+                                        <span class="py-1 text-slate-600">۶</span>
+                                        <span class="py-1 text-slate-600">۷</span>
+                                        <span class="py-1 rounded bg-navy-900 text-white shadow-xs" title="۱۴۰۳/۰۷/۰۸ - کنترل کاور میلگرد">۸</span>
+                                        <span class="py-1 text-slate-600">۹</span>
+                                        <span class="py-1 text-slate-600">۱۰</span>
+                                        <span class="py-1 text-slate-600">۱۱</span>
+                                        <span class="py-1 text-slate-600">۱۲</span>
+                                        <span class="py-1 text-slate-600">۱۳</span>
+                                        <span class="py-1 text-slate-600">۱۴</span>
+                                        <span class="py-1 rounded bg-navy-900 text-white shadow-xs" title="۱۴۰۳/۰۱/۱۵ - شروع رسمی پروژه">۱۵</span>
+                                        <span class="py-1 rounded bg-navy-900 text-white shadow-xs" title="۱۴۰۴/۰۲/۱۵ - پایان فاز اسکلت">۱۶</span>
+                                        <span class="py-1 text-slate-600">۱۷</span>
+                                        <span class="py-1 rounded bg-amberbrand-400 text-white shadow-xs" title="۱۴۰۳/۰۷/۱۸ - تست کشش نیل‌ها">۱۸</span>
+                                        <span class="py-1 text-slate-600">۱۹</span>
+                                        <span class="py-1 text-slate-600">۲۰</span>
+                                        <span class="py-1 text-slate-600">۲۱</span>
+                                        <span class="py-1 text-slate-600">۲۲</span>
+                                        <span class="py-1 text-slate-600">۲۳</span>
+                                        <span class="py-1 text-slate-600">۲۴</span>
+                                        <span class="py-1 rounded bg-amberbrand-400 text-white shadow-xs" title="۱۴۰۳/۰۷/۲۵ - شروع فونداسیون">۲۵</span>
+                                        <span class="py-1 text-slate-600">۲۶</span>
+                                        <span class="py-1 text-slate-600">۲۷</span>
+                                        <span class="py-1 rounded bg-navy-900 text-white shadow-xs" title="۱۴۰۵/۰۶/۲۸ - بازرسی نهایی">۲۸</span>
+                                        <span class="py-1 text-slate-600">۲۹</span>
+                                        <span class="py-1 text-slate-600">۳۰</span>
+                                        <span class="py-1 text-slate-300">۱</span>
+                                        <span class="py-1 text-slate-300">۲</span>
+                                        <span class="py-1 text-slate-300">۳</span>
+                                    </div>
+                                    <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-xs bg-amberbrand-400"></span> شروع فاز اجرایی</span>
+                                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-xs bg-navy-900"></span> بازرسی/تحویل</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ستون چپ (۱ واحد عرض): کارت نمودار حلقه‌ای پیشرفت کل + لیست وضعیت فازها مطابق تصویر -->
+                        <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100/80 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="text-base font-bold text-navy-900">پیشرفت فیزیکی کل</h3>
+                                    <span class="text-xs font-semibold text-amberbrand-600 bg-amberbrand-400/15 px-2.5 py-1 rounded-full">فاز ۴ از ۷</span>
+                                </div>
+                                <p class="text-xs text-slate-400 mb-6">میانگین وزنی پیشرفت فازها و فعالیت‌های پروژه</p>
+
+                                <!-- نمودار دونات ۵۲٪ تکه‌های جدا از هم با گوشه‌های پخ‌خورده به سبک Power BI -->
+                                <div class="relative w-48 h-48 mx-auto my-2 flex items-center justify-center">
+                                    <canvas id="overallDonutChart"></canvas>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span id="overall-progress-text" class="text-3xl font-extrabold text-navy-900">۵۲٪</span>
+                                        <span class="text-[11px] text-slate-400 mt-0.5">تکمیل شده</span>
+                                    </div>
+                                </div>
+
+                                <!-- خطوط خلاصه زیر نمودار مطابق تصویر -->
+                                <div class="mt-6 space-y-3.5 text-xs">
+                                    <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                                        <span class="text-slate-500 flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            فازهای تکمیل شده
+                                        </span>
+                                        <span class="font-bold text-navy-900">۳ فاز (مطالعات، مجوز، گودبرداری)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                                        <span class="text-slate-500 flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full bg-amberbrand-400"></span>
+                                            فاز فعال کنونی
+                                        </span>
+                                        <span class="font-bold text-amberbrand-600">فونداسیون و اسکلت (۶۵٪)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                                        <span class="text-slate-500 flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full bg-navy-900"></span>
+                                            فازهای آتی برنامه‌ریزی‌شده
+                                        </span>
+                                        <span class="font-bold text-navy-900">۳ فاز (سفت‌کاری تا تحویل)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-2">
+                                        <span class="text-slate-500 flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                                            پیمانکار فعال فعلی
+                                        </span>
+                                        <span class="font-bold text-navy-900">شرکت سازه گستر</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="switchTab('phases')" class="mt-6 w-full py-3 rounded-full bg-amberbrand-400 hover:bg-amberbrand-500 text-white text-xs font-bold shadow-md hover:shadow-lg transition">
+                                مشاهده جدول زمان‌بندی فازها
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ردیف چهارم: خلاصه سریع فعالیت‌ها و مصالح در نمای کلی -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- خلاصه فعالیت‌ها -->
+                        <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100/80">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-bold text-navy-900 flex items-center gap-2">
+                                    <i data-lucide="list-checks" class="w-4 h-4 text-amberbrand-500"></i>
+                                    وضعیت فعالیت‌های اجرایی (Tasks)
+                                </h3>
+                                <button onclick="switchTab('tasks')" class="text-xs text-amberbrand-600 font-semibold hover:underline">همه فعالیت‌ها</button>
+                            </div>
+                            <div id="overview-tasks-list" class="space-y-3"></div>
+                        </div>
+
+                        <!-- خلاصه مصالح -->
+                        <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100/80">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-sm font-bold text-navy-900 flex items-center gap-2">
+                                    <i data-lucide="boxes" class="w-4 h-4 text-navy-800"></i>
+                                    مصالح کلیدی پروژه (Materials)
+                                </h3>
+                                <button onclick="switchTab('materials')" class="text-xs text-amberbrand-600 font-semibold hover:underline">جزئیات مالی</button>
+                            </div>
+                            <div id="overview-materials-list" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- نمای ۲: جدول فازهای پروژه (Project_Phases) -->
+                <!-- ========================================================= -->
+                <div id="view-phases" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                            <div>
+                                <h2 class="text-lg font-bold text-navy-900">جدول فازهای پروژه (Project_Phases)</h2>
+                                <p class="text-xs text-slate-500 mt-1">ترتیب اجرایی، بازه زمانی و وضعیت فعلی ۷ فاز مجتمع مسکونی آفتاب</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="filterPhases('all')" class="phase-filter-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-navy-900 text-white">همه (۷)</button>
+                                <button onclick="filterPhases('تکمیل شده')" class="phase-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">تکمیل شده (۳)</button>
+                                <button onclick="filterPhases('در حال اجرا')" class="phase-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">در حال اجرا (۱)</button>
+                                <button onclick="filterPhases('برنامه‌ریزی شده')" class="phase-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">برنامه‌ریزی شده (۳)</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-xs text-slate-500 bg-slate-50/70">
+                                        <th class="py-3.5 px-4 font-semibold rounded-tr-xl">ترتیب / کد</th>
+                                        <th class="py-3.5 px-4 font-semibold">عنوان فاز پروژه</th>
+                                        <th class="py-3.5 px-4 font-semibold">تاریخ شروع</th>
+                                        <th class="py-3.5 px-4 font-semibold">تاریخ پایان</th>
+                                        <th class="py-3.5 px-4 font-semibold rounded-tl-xl">وضعیت</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="phases-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- نمای ۳: جدول فعالیت‌ها (Tasks) -->
+                <!-- ========================================================= -->
+                <div id="view-tasks" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100">
+                        <div class="mb-6">
+                            <h2 class="text-lg font-bold text-navy-900">جدول فعالیت‌ها و پیشرفت اجرایی (Tasks)</h2>
+                            <p class="text-xs text-slate-500 mt-1">جزئیات فعالیت‌های تعریف شده، مسئول اجرا، بازه زمانی و درصد پیشرفت واقعی</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-xs text-slate-500 bg-slate-50/70">
+                                        <th class="py-3.5 px-4 font-semibold rounded-tr-xl">کد فعالیت</th>
+                                        <th class="py-3.5 px-4 font-semibold">شرح فعالیت</th>
+                                        <th class="py-3.5 px-4 font-semibold">فاز مرتبط</th>
+                                        <th class="py-3.5 px-4 font-semibold">مسئول اجرا</th>
+                                        <th class="py-3.5 px-4 font-semibold">بازه برنامه‌ریزی</th>
+                                        <th class="py-3.5 px-4 font-semibold">درصد پیشرفت</th>
+                                        <th class="py-3.5 px-4 font-semibold rounded-tl-xl">وضعیت</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tasks-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- نمای ۴: جدول مصالح (Materials) -->
+                <!-- ========================================================= -->
+                <div id="view-materials" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                            <div>
+                                <h2 class="text-lg font-bold text-navy-900">جدول مصالح و تدارکات پروژه (Materials)</h2>
+                                <p class="text-xs text-slate-500 mt-1">لیست مصالح مصرفی، مقادیر مورد نیاز، قیمت واحد و تامین‌کنندگان</p>
+                            </div>
+                            <div class="bg-navy-900 text-white px-4 py-2.5 rounded-xl text-xs">
+                                <span class="text-slate-300">جمع کل برآورد مصالح:</span>
+                                <strong class="text-amberbrand-400 text-sm mr-1">۱۹۱,۳۰۰,۰۰۰,۰۰۰ ریال</strong>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-xs text-slate-500 bg-slate-50/70">
+                                        <th class="py-3.5 px-4 font-semibold rounded-tr-xl">کد مصالح</th>
+                                        <th class="py-3.5 px-4 font-semibold">نام مصالح</th>
+                                        <th class="py-3.5 px-4 font-semibold">مقدار مورد نیاز</th>
+                                        <th class="py-3.5 px-4 font-semibold">قیمت واحد (ریال)</th>
+                                        <th class="py-3.5 px-4 font-semibold">قیمت کل (ریال)</th>
+                                        <th class="py-3.5 px-4 font-semibold rounded-tl-xl">تامین‌کننده</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="materials-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- نمای ۵: جدول بازرسی و تحویل (Inspections_Handover) -->
+                <!-- ========================================================= -->
+                <div id="view-inspections" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100">
+                        <div class="mb-6">
+                            <h2 class="text-lg font-bold text-navy-900">جدول بازرسی فنی و تحویل (Inspections_Handover)</h2>
+                            <p class="text-xs text-slate-500 mt-1">سوابق کنترل کیفیت، تست‌های آزمایشگاهی و صورت‌جلسات نظارت مهندس ناظر سازه</p>
+                        </div>
+                        <div id="inspections-cards-grid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
+                    </div>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- نمای ۶: جدول تیم و پیمانکاران (Contractors_Staff) -->
+                <!-- ========================================================= -->
+                <div id="view-team" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-100">
+                        <div class="mb-6">
+                            <h2 class="text-lg font-bold text-navy-900">تیم مدیریت، نظارت و پیمانکاران (Contractors_Staff)</h2>
+                            <p class="text-xs text-slate-500 mt-1">اطلاعات تماس و مسئولیت‌های کلیدی عوامل اجرایی مجتمع مسکونی آفتاب</p>
+                        </div>
+                        <div id="team-cards-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <!-- ستون سمت چپ (فضای خالی قبلی): دو بخش آپلود عکس و آپلود/پخش مدیا -->
+        <aside class="w-full 2xl:w-[410px] shrink-0 flex flex-col md:flex-row 2xl:flex-col gap-6">
+
+            <!-- باکس اول: فضای آپلود و نمایش تصاویر پروژه -->
+            <div class="flex-1 bg-surface sm:rounded-2xl shadow-2xl border border-white/60 p-5 sm:p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-navy-900 text-amberbrand-400 flex items-center justify-center shadow">
+                                <i data-lucide="image" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-navy-900">گالری و آپلود تصاویر</h3>
+                                <p class="text-[11px] text-slate-500">بارگذاری عکس‌های پیشرفت کارگاه</p>
+                            </div>
+                        </div>
+                        <span id="photo-count-badge" class="text-[11px] font-bold bg-amberbrand-400/15 text-amberbrand-600 px-2.5 py-1 rounded-full">۰ تصویر</span>
+                    </div>
+
+                    <!-- ناحیه کشیدن و رها کردن یا انتخاب عکس -->
+                    <label for="photo-upload-input" id="photo-dropzone" class="group cursor-pointer border-2 border-dashed border-slate-300 hover:border-amberbrand-500 bg-white/80 hover:bg-white rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-all duration-200">
+                        <div class="w-12 h-12 rounded-full bg-amberbrand-400/15 text-amberbrand-500 group-hover:scale-110 transition flex items-center justify-center mb-2.5">
+                            <i data-lucide="image-plus" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-bold text-navy-900">برای انتخاب یا رها کردن عکس کلیک کنید</span>
+                        <span class="text-[11px] text-slate-400 mt-1">امکان انتخاب هم‌زمان چندین تصویر</span>
+                        <input id="photo-upload-input" type="file" accept="image/*" multiple class="hidden" onchange="handlePhotoUpload(event)">
+                    </label>
+
+                    <!-- پیش‌نمایش تصویر بزرگ انتخاب‌شده -->
+                    <div id="featured-photo-wrapper" class="hidden mt-4 rounded-2xl overflow-hidden bg-navy-950 border border-slate-200 shadow-card relative group">
+                        <img id="featured-photo-img" src="" alt="پیش‌نمایش تصویر پروژه" class="w-full h-52 object-cover">
+                        <div class="p-3 bg-white flex items-center justify-between gap-2">
+                            <span id="featured-photo-name" class="text-xs font-semibold text-navy-900 truncate"></span>
+                            <button onclick="clearFeaturedPhoto()" class="text-[11px] text-rose-600 hover:underline shrink-0 font-medium">بستن پیش‌نمایش</button>
+                        </div>
+                    </div>
+
+                    <!-- شبکه بندانگشتی تصاویر آپلود شده -->
+                    <div id="photo-gallery-grid" class="grid grid-cols-3 gap-2.5 mt-4 max-h-56 overflow-y-auto pr-0.5"></div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>پشتیبانی از پیش‌نمایش زنده</span>
+                    <button onclick="document.getElementById('photo-upload-input').click()" class="px-3 py-1.5 bg-navy-900 hover:bg-navy-800 text-white font-semibold rounded-lg transition">
+                        + افزودن عکس
+                    </button>
+                </div>
+            </div>
+
+            <!-- باکس دوم: فضای آپلود و پخش مدیا (بدون محدودیت فرمت) -->
+            <div class="flex-1 bg-surface sm:rounded-2xl shadow-2xl border border-white/60 p-5 sm:p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-navy-800 to-navy-950 text-cyan-400 flex items-center justify-center shadow">
+                                <i data-lucide="play-circle" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-navy-900">پخش‌کننده و آپلود مدیا</h3>
+                                <p class="text-[11px] text-slate-500">بدون محدودیت فرمت فایل (ویدیو، صوت و...)</p>
+                            </div>
+                        </div>
+                        <span id="media-count-badge" class="text-[11px] font-bold bg-navy-900 text-white px-2.5 py-1 rounded-full">۰ فایل</span>
+                    </div>
+
+                    <!-- ناحیه آپلود مدیا بدون هیچ‌گونه محدودیت پسوند یا accept -->
+                    <label for="media-upload-input" id="media-dropzone" class="group cursor-pointer border-2 border-dashed border-slate-300 hover:border-cyan-500 bg-white/80 hover:bg-white rounded-2xl p-5 flex flex-col items-center justify-center text-center transition-all duration-200">
+                        <div class="w-12 h-12 rounded-full bg-cyan-500/15 text-cyan-600 group-hover:scale-110 transition flex items-center justify-center mb-2.5">
+                            <i data-lucide="film" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-bold text-navy-900">فایل مدیا را انتخاب یا اینجا رها کنید</span>
+                        <span class="text-[11px] text-slate-400 mt-1">پشتیبانی آزاد از همه فرمت‌ها (MP4, MKV, MOV, MP3, WAV, WebM, ...)</span>
+                        <!-- بدون ویژگی accept تا هیچ محدودیتی برای فرمت فایل وجود نداشته باشد -->
+                        <input id="media-upload-input" type="file" multiple class="hidden" onchange="handleMediaUpload(event)">
+                    </label>
+
+                    <!-- پلیر تعاملی برای پخش و مشاهده مدیای انتخاب‌شده -->
+                    <div id="media-player-box" class="hidden mt-4 rounded-2xl overflow-hidden bg-navy-950 border border-cyan-500/40 shadow-[0_10px_25px_rgba(11,37,60,0.2)]">
+                        <div class="px-3.5 py-2 bg-navy-900 text-white flex items-center justify-between gap-2 border-b border-white/10">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0"></span>
+                                <span id="active-media-title" class="text-xs font-semibold truncate">در حال پخش...</span>
+                            </div>
+                            <span id="active-media-ext" class="text-[10px] uppercase bg-white/10 text-amberbrand-400 px-2 py-0.5 rounded font-mono shrink-0">MEDIA</span>
+                        </div>
+                        <div id="media-render-stage" class="p-2 bg-black flex items-center justify-center min-h-[190px]">
+                            <!-- تگ video یا audio یا object به صورت پویا اینجا قرار می‌گیرد -->
+                        </div>
+                    </div>
+
+                    <!-- لیست فایل‌های مدیای آپلود شده برای انتخاب و پخش -->
+                    <div id="media-playlist" class="mt-4 space-y-2 max-h-48 overflow-y-auto pr-0.5"></div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>پخش مستقیم در مرورگر</span>
+                    <button onclick="document.getElementById('media-upload-input').click()" class="px-3 py-1.5 bg-amberbrand-400 hover:bg-amberbrand-500 text-white font-semibold rounded-lg transition">
+                        + بارگذاری مدیا
+                    </button>
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- مودال شناسنامه کامل پروژه (Project Details) -->
+    <div id="project-modal" class="fixed inset-0 bg-navy-950/60 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-fade-in">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-navy-900 text-amberbrand-400 flex items-center justify-center">
+                        <i data-lucide="building" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-navy-900 text-base">شناسنامه پروژه (جدول Projects)</h3>
+                        <span class="text-xs text-slate-400">کد سیستمی: ۱۰۱</span>
+                    </div>
+                </div>
+                <button onclick="closeProjectDetailsModal()" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="py-4 space-y-3 text-sm">
+                <div class="flex justify-between py-2 border-b border-slate-50">
+                    <span class="text-slate-500">نام پروژه:</span>
+                    <span class="font-bold text-navy-900">مجتمع مسکونی آفتاب</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-50">
+                    <span class="text-slate-500">کارفرما:</span>
+                    <span class="font-semibold text-navy-800">شرکت توسعه عمران پارس</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-50">
+                    <span class="text-slate-500">موقعیت مکانی:</span>
+                    <span class="font-semibold text-navy-800">تهران، سعادت‌آباد</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-50">
+                    <span class="text-slate-500">تاریخ شروع قرارداد:</span>
+                    <span class="font-semibold text-navy-800">۱۴۰۳-۰۱-۱۵</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-50">
+                    <span class="text-slate-500">تاریخ پایان تخمینی:</span>
+                    <span class="font-semibold text-navy-800">۱۴۰۵-۰۶-۳۰</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-50">
+                    <span class="text-slate-500">بودجه مصوب کل:</span>
+                    <span class="font-bold text-emerald-600">۸۵۰,۰۰۰,۰۰۰,۰۰۰ ریال</span>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-slate-500">وضعیت فعلی:</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amberbrand-400/20 text-amberbrand-600">در حال اجرا</span>
+                </div>
+            </div>
+            <div class="pt-3 flex justify-end">
+                <button onclick="closeProjectDetailsModal()" class="px-5 py-2 bg-navy-900 text-white text-xs font-semibold rounded-xl hover:bg-navy-800 transition">بستن پنجره</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- اسکریپت داده‌ها، رندر جداول و نمودارها -->
+    <script>
+        // ==========================================
+        // ۱. پایگاه داده دقیق مطابق جداول ارسالی کاربر
+        // ==========================================
+        const projectData = {
+            project: {
+                project_id: 101,
+                project_name: "مجتمع مسکونی آفتاب",
+                client_name: "شرکت توسعه عمران پارس",
+                location: "تهران، سعادت‌آباد",
+                start_date: "1403-01-15",
+                estimated_end_date: "1405-06-30",
+                total_budget: 850000000000,
+                status: "در حال اجرا"
+            },
+            phases: [
+                { phase_id: 1, project_id: 101, phase_name: "مطالعات اولیه و طراحی نقشه", phase_order: 1, start_date: "1403-01-15", end_date: "1403-03-10", status: "تکمیل شده" },
+                { phase_id: 2, project_id: 101, phase_name: "اخذ جواز ساخت و مجوزها", phase_order: 2, start_date: "1403-03-11", end_date: "1403-05-01", status: "تکمیل شده" },
+                { phase_id: 3, project_id: 101, phase_name: "گودبرداری و پایدارسازی", phase_order: 3, start_date: "1403-05-05", end_date: "1403-07-20", status: "تکمیل شده" },
+                { phase_id: 4, project_id: 101, phase_name: "اجرای فونداسیون و اسکلت", phase_order: 4, start_date: "1403-07-25", end_date: "1404-02-15", status: "در حال اجرا" },
+                { phase_id: 5, project_id: 101, phase_name: "سفت‌کاری و تاسیسات مکانیکی/برقی", phase_order: 5, start_date: "1404-02-20", end_date: "1404-10-30", status: "برنامه‌ریزی شده" },
+                { phase_id: 6, project_id: 101, phase_name: "نازک‌کاری و نما", phase_order: 6, start_date: "1404-11-01", end_date: "1405-05-15", status: "برنامه‌ریزی شده" },
+                { phase_id: 7, project_id: 101, phase_name: "تست نهایی، پایان کار و تحویل", phase_order: 7, start_date: "1405-05-16", end_date: "1405-06-30", status: "برنامه‌ریزی شده" }
+            ],
+            staff: [
+                { member_id: 201, full_name: "مهندس رضا کریمی", role: "مدیر پروژه", company_name: "مشاوران طرح نو", phone: "09121112233" },
+                { member_id: 202, full_name: "مهندس سارا راد", role: "مهندس ناظر سازه", company_name: "نظام مهندسی", phone: "09124445566" },
+                { member_id: 203, full_name: "علی محمدی", role: "پیمانکار اسکلت بتنی", company_name: "شرکت سازه گستر", phone: "09127778899" }
+            ],
+            tasks: [
+                { task_id: 301, phase_id: 1, assigned_to: 201, task_name: "طراحی فاز ۱ و ۲ معماری و سازه", planned_start: "1403-01-15", planned_end: "1403-03-10", progress_percent: 100, status: "تکمیل شده" },
+                { task_id: 302, phase_id: 3, assigned_to: 203, task_name: "اجرای نیلینگ و خاکبرداری", planned_start: "1403-05-05", planned_end: "1403-07-20", progress_percent: 100, status: "تکمیل شده" },
+                { task_id: 303, phase_id: 4, assigned_to: 203, task_name: "آرماتوربندی و بتن‌ریزی فونداسیون", planned_start: "1403-07-25", planned_end: "1403-09-10", progress_percent: 100, status: "تکمیل شده" },
+                { task_id: 304, phase_id: 4, assigned_to: 203, task_name: "اجرای ستون‌ها و سقف طبقات ۱ تا ۵", planned_start: "1403-09-15", planned_end: "1404-02-15", progress_percent: 65, status: "در حال اجرا" },
+                { task_id: 305, phase_id: 7, assigned_to: 201, task_name: "تنظیم صورت‌جلسه تحویل موقت به کارفرما", planned_start: "1405-06-15", planned_end: "1405-06-30", progress_percent: 0, status: "در انتظار" }
+            ],
+            materials: [
+                { material_id: 401, project_id: 101, material_name: "میلگرد آجدار سایز ۱۶ و ۱۸", unit: "تن", quantity_required: 420, unit_price: 285000000, supplier_name: "ذوب‌آهن اصفهان" },
+                { material_id: 402, project_id: 101, material_name: "بتن آماده عیار ۴۰۰", unit: "مترمکعب", quantity_required: 3100, unit_price: 18500000, supplier_name: "بتن آماده تهران" },
+                { material_id: 403, project_id: 101, material_name: "سیمان تیپ ۲", unit: "کیسه", quantity_required: 15000, unit_price: 950000, supplier_name: "سیمان آبیک" }
+            ],
+            inspections: [
+                { inspection_id: 501, project_id: 101, phase_id: 3, inspector_id: 202, inspection_date: "1403-07-18", checklist_title: "تست کشش نیل‌ها و پایداری دیواره گود", result: "تایید شده", notes: "مطابق نقشه‌های مصوب اجرا شد" },
+                { inspection_id: 502, project_id: 101, phase_id: 4, inspector_id: 202, inspection_date: "1403-09-08", checklist_title: "کنترل کاور میلگرد و آزمایش مقاومت بتن", result: "تایید شده", notes: "نمونه ۷ و ۲۸ روزه پاس شد" },
+                { inspection_id: 503, project_id: 101, phase_id: 7, inspector_id: 202, inspection_date: "1405-06-28", checklist_title: "بازرسی نهایی تاسیسات و تحویل کلید", result: "در انتظار", notes: "منوط به رفع نواقص احتمالی" }
+            ]
+        };
+
+        // توابع کمکی فرمت‌دهی اعداد فارسی
+        const formatNumber = (num) => num.toLocaleString('fa-IR');
+
+        const getStatusBadge = (status) => {
+            if (status === 'تکمیل شده' || status === 'تایید شده') {
+                return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>${status}</span>`;
+            } else if (status === 'در حال اجرا') {
+                return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amberbrand-400/15 text-amberbrand-600 border border-amberbrand-400/30"><span class="w-1.5 h-1.5 rounded-full bg-amberbrand-500 animate-pulse"></span>${status}</span>`;
+            } else {
+                return `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>${status}</span>`;
+            }
+        };
+
+        // ==========================================
+        // ۲. رندر کردن بخش‌های مختلف داشبرد
+        // ==========================================
+        function renderOverviewLists() {
+            // لیست فعالیت‌ها در نمای کلی
+            const tasksContainer = document.getElementById('overview-tasks-list');
+            tasksContainer.innerHTML = projectData.tasks.map(t => {
+                const staff = projectData.staff.find(s => s.member_id === t.assigned_to);
+                const barColor = t.progress_percent === 100 ? 'bg-navy-900' : (t.progress_percent > 0 ? 'bg-amberbrand-400' : 'bg-slate-300');
+                return `
+                    <div class="p-3 rounded-xl bg-slate-50/80 border border-slate-100 hover:border-slate-200 transition">
+                        <div class="flex items-center justify-between text-xs mb-1.5">
+                            <span class="font-bold text-navy-900">${t.task_name}</span>
+                            <span class="font-extrabold text-navy-800">${t.progress_percent}٪</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden mb-1.5">
+                            <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width: ${t.progress_percent}%"></div>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] text-slate-500">
+                            <span>مسئول: ${staff ? staff.full_name : '-'}</span>
+                            <span>پایان: ${t.planned_end}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // لیست مصالح در نمای کلی
+            const matContainer = document.getElementById('overview-materials-list');
+            matContainer.innerHTML = projectData.materials.map(m => {
+                const total = m.quantity_required * m.unit_price;
+                return `
+                    <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center justify-between gap-3">
+                        <div>
+                            <div class="text-xs font-bold text-navy-900">${m.material_name}</div>
+                            <div class="text-[11px] text-slate-500 mt-1">
+                                مقدار: <strong class="text-navy-800">${formatNumber(m.quantity_required)} ${m.unit}</strong> • تامین‌کننده: ${m.supplier_name}
+                            </div>
+                        </div>
+                        <div class="text-left shrink-0">
+                            <div class="text-xs font-extrabold text-amberbrand-600">${formatNumber(total / 10000000)} <span class="text-[10px] font-normal text-slate-500">میلیون تومان</span></div>
+                            <div class="text-[10px] text-slate-400">فی: ${formatNumber(m.unit_price)} ریال</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderPhasesTable(filter = 'all') {
+            const tbody = document.getElementById('phases-table-body');
+            const filtered = filter === 'all' ? projectData.phases : projectData.phases.filter(p => p.status === filter);
+            tbody.innerHTML = filtered.map(p => `
+                <tr class="hover:bg-slate-50/90 transition">
+                    <td class="py-3.5 px-4 font-bold text-navy-900">فاز ${p.phase_order} <span class="text-xs text-slate-400 font-normal">(#${p.phase_id})</span></td>
+                    <td class="py-3.5 px-4 font-semibold text-slate-800">${p.phase_name}</td>
+                    <td class="py-3.5 px-4 text-slate-600 text-xs">${p.start_date}</td>
+                    <td class="py-3.5 px-4 text-slate-600 text-xs">${p.end_date}</td>
+                    <td class="py-3.5 px-4">${getStatusBadge(p.status)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterPhases(status) {
+            document.querySelectorAll('.phase-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-navy-900', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            });
+            event.target.classList.remove('bg-slate-100', 'text-slate-600');
+            event.target.classList.add('bg-navy-900', 'text-white');
+            renderPhasesTable(status);
+        }
+
+        function renderTasksTable() {
+            const tbody = document.getElementById('tasks-table-body');
+            tbody.innerHTML = projectData.tasks.map(t => {
+                const phase = projectData.phases.find(p => p.phase_id === t.phase_id);
+                const staff = projectData.staff.find(s => s.member_id === t.assigned_to);
+                const barColor = t.progress_percent === 100 ? 'bg-emerald-500' : (t.progress_percent > 0 ? 'bg-amberbrand-400' : 'bg-slate-300');
+                return `
+                    <tr class="hover:bg-slate-50/90 transition">
+                        <td class="py-3.5 px-4 font-bold text-navy-900">#${t.task_id}</td>
+                        <td class="py-3.5 px-4 font-semibold text-slate-800">${t.task_name}</td>
+                        <td class="py-3.5 px-4 text-xs text-slate-600">${phase ? phase.phase_name : '-'}</td>
+                        <td class="py-3.5 px-4 text-xs font-medium text-navy-800">${staff ? staff.full_name : '-'}</td>
+                        <td class="py-3.5 px-4 text-xs text-slate-500">${t.planned_start} تا ${t.planned_end}</td>
+                        <td class="py-3.5 px-4 w-44">
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                    <div class="h-full ${barColor} rounded-full" style="width: ${t.progress_percent}%"></div>
+                                </div>
+                                <span class="text-xs font-bold text-navy-900 w-9">${t.progress_percent}٪</span>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4">${getStatusBadge(t.status)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderMaterialsTable() {
+            const tbody = document.getElementById('materials-table-body');
+            tbody.innerHTML = projectData.materials.map(m => {
+                const total = m.quantity_required * m.unit_price;
+                return `
+                    <tr class="hover:bg-slate-50/90 transition">
+                        <td class="py-3.5 px-4 font-bold text-navy-900">#${m.material_id}</td>
+                        <td class="py-3.5 px-4 font-semibold text-slate-800">${m.material_name}</td>
+                        <td class="py-3.5 px-4 text-xs font-bold text-navy-800">${formatNumber(m.quantity_required)} ${m.unit}</td>
+                        <td class="py-3.5 px-4 text-xs text-slate-600">${formatNumber(m.unit_price)}</td>
+                        <td class="py-3.5 px-4 text-xs font-extrabold text-amberbrand-600">${formatNumber(total)}</td>
+                        <td class="py-3.5 px-4 text-xs font-medium text-slate-700">${m.supplier_name}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderInspectionsGrid() {
+            const grid = document.getElementById('inspections-cards-grid');
+            grid.innerHTML = projectData.inspections.map(ins => {
+                const phase = projectData.phases.find(p => p.phase_id === ins.phase_id);
+                const inspector = projectData.staff.find(s => s.member_id === ins.inspector_id);
+                const isApproved = ins.result === 'تایید شده';
+                return `
+                    <div class="rounded-2xl p-5 border ${isApproved ? 'border-emerald-200/80 bg-emerald-50/30' : 'border-amberbrand-400/40 bg-amberbrand-400/5'} flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold text-navy-900 bg-white px-2.5 py-1 rounded-lg shadow-xs">کد بازرسی #${ins.inspection_id}</span>
+                                ${getStatusBadge(ins.result)}
+                            </div>
+                            <h4 class="font-bold text-navy-900 text-sm mb-2">${ins.checklist_title}</h4>
+                            <p class="text-xs text-slate-600 bg-white/80 p-3 rounded-xl border border-slate-100 leading-relaxed mb-4">
+                                <span class="font-semibold text-navy-800">یادداشت ناظر:</span> ${ins.notes}
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-200/60 text-[11px] text-slate-500 space-y-1">
+                            <div class="flex justify-between"><span>فاز مرتبط:</span><strong class="text-navy-800">${phase ? phase.phase_name : '-'}</strong></div>
+                            <div class="flex justify-between"><span>مهندس ناظر:</span><strong class="text-navy-800">${inspector ? inspector.full_name : '-'}</strong></div>
+                            <div class="flex justify-between"><span>تاریخ بازرسی:</span><strong class="text-navy-800">${ins.inspection_date}</strong></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTeamGrid() {
+            const grid = document.getElementById('team-cards-grid');
+            grid.innerHTML = projectData.staff.map(member => {
+                const assignedTasks = projectData.tasks.filter(t => t.assigned_to === member.member_id);
+                return `
+                    <div class="rounded-2xl p-5 bg-slate-50/80 border border-slate-200/70 hover:shadow-card transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-3.5 mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-navy-900 text-amberbrand-400 flex items-center justify-center font-bold text-lg shadow">
+                                    ${member.full_name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-navy-900 text-sm">${member.full_name}</h4>
+                                    <span class="text-xs font-semibold text-amberbrand-600">${member.role}</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-xs text-slate-600 bg-white p-3.5 rounded-xl border border-slate-100">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">شرکت / سازمان:</span>
+                                    <span class="font-semibold text-navy-900">${member.company_name}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">شماره تماس:</span>
+                                    <span class="font-semibold text-navy-900 dir-ltr">${member.phone}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">کد پرسنلی:</span>
+                                    <span class="font-semibold text-navy-900">#${member.member_id}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                            <span class="text-slate-500">فعالیت‌های محول شده:</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-navy-900 text-white font-bold">${assignedTasks.length} مورد</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==========================================
+        // ۳. راه‌اندازی نمودارهای Chart.js مطابق پالت سرمه‌ای و نارنجی تصویر
+        // ==========================================
+        let barChartInstance = null;
+        let waveChartInstance = null;
+        let donutChartInstance = null;
+
+        function initCharts() {
+            Chart.defaults.font.family = 'Vazirmatn, sans-serif';
+            Chart.defaults.color = '#64748b';
+
+            if (barChartInstance) barChartInstance.destroy();
+            if (waveChartInstance) waveChartInstance.destroy();
+            if (donutChartInstance) donutChartInstance.destroy();
+
+            // ۱. نمودار میله‌ای فعالیت‌ها (نارنجی و سرمه‌ای مطابق تصویر)
+            const ctxBar = document.getElementById('tasksBarChart').getContext('2d');
+            const taskLabels = projectData.tasks.map(t => t.task_name.length > 22 ? t.task_name.slice(0, 22) + '...' : t.task_name);
+            const taskActuals = projectData.tasks.map(t => Number(t.progress_percent) || 0);
+            const taskPlanned = projectData.tasks.map(t => t.status === 'تکمیل شده' ? 100 : (t.status === 'در حال اجرا' ? 80 : 10));
+
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: taskLabels,
+                    datasets: [
+                        {
+                            label: 'برنامه‌ریزی شده (٪)',
+                            data: taskPlanned,
+                            backgroundColor: '#ffaa1d',
+                            borderRadius: 6,
+                            barPercentage: 0.55,
+                            categoryPercentage: 0.65
+                        },
+                        {
+                            label: 'پیشرفت واقعی (٪)',
+                            data: taskActuals,
+                            backgroundColor: '#0b253c',
+                            borderRadius: 6,
+                            barPercentage: 0.55,
+                            categoryPercentage: 0.65
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0b253c',
+                            padding: 10,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            display: false,
+                            beginAtZero: true
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 9 } }
+                        }
+                    }
+                }
+            });
+
+            // ۲. نمودار موجی (Area/Line) سهم مالی مصالح مطابق تصویر
+            const ctxWave = document.getElementById('materialsWaveChart').getContext('2d');
+            const gradientAmber = ctxWave.createLinearGradient(0, 0, 0, 170);
+            gradientAmber.addColorStop(0, 'rgba(255, 170, 29, 0.85)');
+            gradientAmber.addColorStop(1, 'rgba(255, 170, 29, 0.05)');
+
+            const gradientNavy = ctxWave.createLinearGradient(0, 0, 0, 170);
+            gradientNavy.addColorStop(0, 'rgba(11, 37, 60, 0.75)');
+            gradientNavy.addColorStop(1, 'rgba(11, 37, 60, 0.05)');
+
+            const matTotalsBillion = projectData.materials.map(m => Number(((m.quantity_required * m.unit_price) / 1e9).toFixed(2)));
+            const waveLabels = ['شروع', ...projectData.materials.map(m => m.material_name), 'جمع کل'];
+            const waveValues = [5, ...matTotalsBillion, 45];
+            let running = 10;
+            const cumulativeValues = [10, ...matTotalsBillion.map(v => { running += v * 0.75; return Number(running.toFixed(1)); }), running + 15];
+
+            waveChartInstance = new Chart(ctxWave, {
+                type: 'line',
+                data: {
+                    labels: waveLabels,
+                    datasets: [
+                        {
+                            label: 'توزیع تجمعی',
+                            data: cumulativeValues,
+                            fill: true,
+                            backgroundColor: gradientNavy,
+                            borderColor: '#0b253c',
+                            borderWidth: 2,
+                            tension: 0.45,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'ارزش هر قلم (میلیارد ریال)',
+                            data: waveValues,
+                            fill: true,
+                            backgroundColor: gradientAmber,
+                            borderColor: '#ffaa1d',
+                            borderWidth: 2,
+                            tension: 0.45,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#ffaa1d'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0b253c',
+                            padding: 8,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false, beginAtZero: true }
+                    }
+                }
+            });
+
+            // ۳. نمودار دایره‌ای پیشرفت کل (به صورت تکه‌های جدا از هم با گوشه‌های پخ‌خورده و رنگ‌های نارنجی پررنگ و کم‌رنگ در سبک Power BI)
+            const ctxDonut = document.getElementById('overallDonutChart').getContext('2d');
+            donutChartInstance = new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        'فازهای تکمیل شده (۳ فاز)',
+                        'فاز در حال اجرا (اسکلت)',
+                        'سفت‌کاری و تاسیسات',
+                        'نازک‌کاری و نما',
+                        'تست نهایی و تحویل'
+                    ],
+                    datasets: [{
+                        data: [43, 9, 18, 18, 12],
+                        backgroundColor: [
+                            '#e66c00', // نارنجی پررنگ Power BI (تکمیل شده)
+                            '#ff9f1c', // نارنجی متوسط روشن (در حال اجرا)
+                            '#ffcb77', // نارنجی پاستلی کم‌رنگ
+                            '#ffe0ac', // نارنجی بسیار روشن
+                            '#fff1d6'  // نارنجی محو (فاز پایانی)
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        borderRadius: 10, // گوشه‌های گرد و پخ‌خورده برای هر تکه
+                        spacing: 6,       // فاصله بین تکه‌ها (تکه‌های جدا از هم)
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0b253c',
+                            padding: 10,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.label}: ${ctx.raw}٪`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // ۳.۵ دانلود تمپلیت اکسل و آپلود دیتای جدید داشبورد
+        // ==========================================
+        function showDataToast(message, isError = false) {
+            const toast = document.getElementById('data-toast');
+            toast.className = `mb-5 px-4 py-3 rounded-xl text-xs font-semibold flex items-center justify-between border shadow-sm ${
+                isError
+                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+            }`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button onclick="this.parentElement.classList.add('hidden')" class="text-xs opacity-70 hover:opacity-100 px-2">✕</button>
+            `;
+            toast.classList.remove('hidden');
+        }
+
+        function downloadDataTemplate() {
+            if (typeof XLSX === 'undefined') {
+                showDataToast('کتابخانه اکسل بارگذاری نشده است. لطفاً اتصال اینترنت را بررسی کنید.', true);
+                return;
+            }
+            const wb = XLSX.utils.book_new();
+
+            // ایجاد ۶ شیت استاندارد مطابق ساختار جداول پروژه
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([projectData.project]), 'Projects');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(projectData.phases), 'Project_Phases');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(projectData.staff), 'Contractors_Staff');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(projectData.tasks), 'Tasks');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(projectData.materials), 'Materials');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(projectData.inspections), 'Inspections_Handover');
+
+            XLSX.writeFile(wb, 'Project_Dashboard_Template.xlsx');
+            showDataToast('فایل تمپلیت اکسل (Project_Dashboard_Template.xlsx) با ۶ شیت استاندارد دانلود شد.');
+        }
+
+        function handleDashboardDataUpload(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            const ext = file.name.split('.').pop().toLowerCase();
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    if (ext === 'json') {
+                        const parsed = JSON.parse(e.target.result);
+                        applyUploadedData(parsed);
+                    } else {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+
+                        const getSheet = (name) => workbook.Sheets[name] ? XLSX.utils.sheet_to_json(workbook.Sheets[name]) : null;
+                        const projectsArr = getSheet('Projects');
+
+                        const extracted = {
+                            project: projectsArr && projectsArr.length ? projectsArr[0] : projectData.project,
+                            phases: getSheet('Project_Phases') || projectData.phases,
+                            staff: getSheet('Contractors_Staff') || projectData.staff,
+                            tasks: getSheet('Tasks') || projectData.tasks,
+                            materials: getSheet('Materials') || projectData.materials,
+                            inspections: getSheet('Inspections_Handover') || projectData.inspections
+                        };
+                        applyUploadedData(extracted);
+                    }
+                    showDataToast(`دیتای جدید از فایل «${file.name}» با موفقیت بارگذاری و در تمام نمودارها و جداول اعمال شد.`);
+                } catch (err) {
+                    showDataToast('خطا در خواندن فایل دیتا! لطفاً مطمئن شوید ساختار فایل مطابق تمپلیت استاندارد است.', true);
+                }
+                event.target.value = '';
+            };
+
+            if (ext === 'json') {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function applyUploadedData(newData) {
+            if (newData.project) projectData.project = newData.project;
+            if (Array.isArray(newData.phases)) projectData.phases = newData.phases;
+            if (Array.isArray(newData.staff)) projectData.staff = newData.staff;
+            if (Array.isArray(newData.tasks)) projectData.tasks = newData.tasks;
+            if (Array.isArray(newData.materials)) projectData.materials = newData.materials;
+            if (Array.isArray(newData.inspections)) projectData.inspections = newData.inspections;
+
+            updateKpiCardsFromData();
+            renderOverviewLists();
+            renderPhasesTable();
+            renderTasksTable();
+            renderMaterialsTable();
+            renderInspectionsGrid();
+            renderTeamGrid();
+            initCharts();
+        }
+
+        function updateKpiCardsFromData() {
+            const budgetRial = Number(projectData.project.total_budget) || 0;
+            const budgetTomanBillion = Number((budgetRial / 1e10).toFixed(2));
+            document.getElementById('kpi-budget-toman').innerHTML = `${formatNumber(budgetTomanBillion)} <span class="text-sm font-normal text-amberbrand-400">میلیارد تومان</span>`;
+            document.getElementById('kpi-budget-rial').textContent = `معادل ${formatNumber(budgetRial)} ریال`;
+
+            const totalMatRial = projectData.materials.reduce((acc, m) => acc + (Number(m.quantity_required) * Number(m.unit_price)), 0);
+            const totalMatTomanBillion = Number((totalMatRial / 1e10).toFixed(2));
+            const ratio = budgetRial > 0 ? ((totalMatRial / budgetRial) * 100).toFixed(1) : 0;
+            document.getElementById('kpi-materials-cost').innerHTML = `${formatNumber(totalMatTomanBillion)} <span class="text-sm font-medium text-slate-500">میلیارد تومان</span>`;
+            document.getElementById('kpi-materials-ratio').innerHTML = `<i data-lucide="trending-up" class="w-3.5 h-3.5"></i><span>${formatNumber(Number(ratio))}٪ از بودجه کل پروژه</span>`;
+
+            const completedPhases = projectData.phases.filter(p => p.status === 'تکمیل شده').length;
+            const activePhase = projectData.phases.find(p => p.status === 'در حال اجرا');
+            document.getElementById('kpi-phases-count').innerHTML = `${formatNumber(completedPhases)} <span class="text-sm font-medium text-slate-500">از ${formatNumber(projectData.phases.length)} فاز</span>`;
+            document.getElementById('kpi-active-phase').textContent = activePhase ? `فاز ${formatNumber(activePhase.phase_order)} (${activePhase.phase_name}) در حال اجرا` : 'همه فازها به‌روزرسانی شدند';
+
+            const approvedIns = projectData.inspections.filter(i => i.result === 'تایید شده').length;
+            const pendingIns = projectData.inspections.filter(i => i.result !== 'تایید شده').length;
+            const doneIns = projectData.inspections.length - pendingIns;
+            const passRate = doneIns > 0 ? Math.round((approvedIns / doneIns) * 100) : 100;
+            document.getElementById('kpi-inspections-rate').innerHTML = `${formatNumber(passRate)}٪ <span class="text-sm font-medium text-emerald-600">تایید</span>`;
+            document.getElementById('kpi-inspections-detail').textContent = `${formatNumber(approvedIns)} بازرسی پاس شده • ${formatNumber(pendingIns)} در انتظار`;
+
+            const avgProgress = projectData.tasks.length
+                ? Math.round(projectData.tasks.reduce((s, t) => s + Number(t.progress_percent || 0), 0) / projectData.tasks.length)
+                : 0;
+            document.getElementById('overall-progress-text').textContent = `${formatNumber(avgProgress)}٪`;
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // ۴. مدیریت جابجایی بین تب‌ها و مودال‌ها
+        // ==========================================
+        const tabTitles = {
+            overview: 'داشبرد مدیریت پروژه',
+            phases: 'زمان‌بندی و فازهای پروژه',
+            tasks: 'مدیریت فعالیت‌ها و پیشرفت اجرایی',
+            materials: 'مدیریت مصالح و برآورد تدارکات',
+            inspections: 'کنترل کیفیت و بازرسی‌های فنی',
+            team: 'تیم اجرایی، نظارت و پیمانکاران'
+        };
+
+        function switchTab(tabId) {
+            // مخفی کردن تمام نماها
+            ['overview', 'phases', 'tasks', 'materials', 'inspections', 'team'].forEach(id => {
+                document.getElementById(`view-${id}`).classList.add('hidden');
+            });
+            // نمایش نمای انتخاب‌شده
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+            // به‌روزرسانی عنوان هدر
+            document.getElementById('page-title').textContent = tabTitles[tabId];
+
+            // به‌روزرسانی استایل منوی کناری
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('active');
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('text-amberbrand-400');
+                    icon.classList.add('text-slate-300');
+                }
+            });
+            const activeBtn = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                const activeIcon = activeBtn.querySelector('i');
+                if (activeIcon) {
+                    activeIcon.classList.remove('text-slate-300');
+                    activeIcon.classList.add('text-amberbrand-400');
+                }
+            }
+        }
+
+        function openProjectDetailsModal() {
+            const modal = document.getElementById('project-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeProjectDetailsModal() {
+            const modal = document.getElementById('project-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function toggleQuickMenu() {
+            openProjectDetailsModal();
+        }
+
+        // ==========================================
+        // ۵. مدیریت آپلود عکس و پخش‌کننده مدیا (بدون محدودیت فرمت)
+        // ==========================================
+        const uploadedPhotos = [];
+        const uploadedMediaList = [];
+
+        function handlePhotoUpload(event) {
+            const files = Array.from(event.target.files || []);
+            if (!files.length) return;
+
+            files.forEach(file => {
+                const url = URL.createObjectURL(file);
+                uploadedPhotos.unshift({ name: file.name, url });
+            });
+
+            renderPhotoGallery();
+            if (uploadedPhotos.length > 0) {
+                showFeaturedPhoto(0);
+            }
+            event.target.value = '';
+        }
+
+        function renderPhotoGallery() {
+            const grid = document.getElementById('photo-gallery-grid');
+            const badge = document.getElementById('photo-count-badge');
+            badge.textContent = `${formatNumber(uploadedPhotos.length)} تصویر`;
+
+            grid.innerHTML = uploadedPhotos.map((photo, idx) => `
+                <div onclick="showFeaturedPhoto(${idx})" class="group relative aspect-square rounded-xl overflow-hidden border-2 border-white shadow-sm cursor-pointer hover:border-amberbrand-400 transition">
+                    <img src="${photo.url}" alt="${photo.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    <button onclick="event.stopPropagation(); removePhoto(${idx})" title="حذف تصویر" class="absolute top-1 left-1 w-5 h-5 rounded-full bg-navy-950/80 text-white text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function showFeaturedPhoto(index) {
+            const photo = uploadedPhotos[index];
+            if (!photo) return;
+            document.getElementById('featured-photo-img').src = photo.url;
+            document.getElementById('featured-photo-name').textContent = photo.name;
+            document.getElementById('featured-photo-wrapper').classList.remove('hidden');
+        }
+
+        function clearFeaturedPhoto() {
+            document.getElementById('featured-photo-wrapper').classList.add('hidden');
+        }
+
+        function removePhoto(index) {
+            URL.revokeObjectURL(uploadedPhotos[index].url);
+            uploadedPhotos.splice(index, 1);
+            renderPhotoGallery();
+            if (uploadedPhotos.length === 0) {
+                clearFeaturedPhoto();
+            } else {
+                showFeaturedPhoto(0);
+            }
+        }
+
+        function handleMediaUpload(event) {
+            const files = Array.from(event.target.files || []);
+            if (!files.length) return;
+
+            files.forEach(file => {
+                const url = URL.createObjectURL(file);
+                const ext = file.name.includes('.') ? file.name.split('.').pop().toUpperCase() : 'FILE';
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                uploadedMediaList.unshift({
+                    name: file.name,
+                    type: file.type || '',
+                    ext,
+                    sizeMB,
+                    url
+                });
+            });
+
+            renderMediaPlaylist();
+            playMediaItem(0);
+            event.target.value = '';
+        }
+
+        function renderMediaPlaylist() {
+            const list = document.getElementById('media-playlist');
+            const badge = document.getElementById('media-count-badge');
+            badge.textContent = `${formatNumber(uploadedMediaList.length)} فایل`;
+
+            list.innerHTML = uploadedMediaList.map((item, idx) => `
+                <div onclick="playMediaItem(${idx})" class="p-2.5 rounded-xl bg-white hover:bg-navy-900 hover:text-white border border-slate-200/80 flex items-center justify-between gap-2 cursor-pointer transition group">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-8 h-8 rounded-lg bg-amberbrand-400/15 text-amberbrand-600 group-hover:bg-amberbrand-400 group-hover:text-white flex items-center justify-center shrink-0 font-bold text-[10px]">
+                            ▶
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-xs font-bold truncate">${item.name}</div>
+                            <div class="text-[10px] text-slate-400 group-hover:text-slate-300">${item.ext} • ${item.sizeMB} مگابایت</div>
+                        </div>
+                    </div>
+                    <button onclick="event.stopPropagation(); removeMediaItem(${idx})" class="text-xs text-slate-400 hover:text-rose-400 px-1.5" title="حذف فایل">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function playMediaItem(index) {
+            const item = uploadedMediaList[index];
+            if (!item) return;
+
+            const playerBox = document.getElementById('media-player-box');
+            const stage = document.getElementById('media-render-stage');
+            document.getElementById('active-media-title').textContent = item.name;
+            document.getElementById('active-media-ext').textContent = item.ext;
+            playerBox.classList.remove('hidden');
+
+            const isAudio = item.type.startsWith('audio/') || ['MP3', 'WAV', 'OGG', 'AAC', 'FLAC', 'M4A'].includes(item.ext);
+            const isImage = item.type.startsWith('image/');
+
+            if (isAudio) {
+                stage.innerHTML = `
+                    <div class="w-full p-4 flex flex-col items-center gap-3 text-center">
+                        <div class="w-12 h-12 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center animate-pulse">
+                            <span class="text-lg">♫</span>
+                        </div>
+                        <audio controls autoplay class="w-full h-10" src="${item.url}"></audio>
+                    </div>
+                `;
+            } else if (isImage) {
+                stage.innerHTML = `<img src="${item.url}" alt="${item.name}" class="max-h-56 w-auto rounded-lg object-contain">`;
+            } else {
+                // پخش ویدیو و سایر فرمت‌های مدیا با تگ video HTML5
+                stage.innerHTML = `
+                    <video controls autoplay playsinline class="w-full max-h-56 rounded-lg bg-black" src="${item.url}">
+                        مرورگر شما از پخش مستقیم این کدک پشتیبانی نمی‌کند.
+                    </video>
+                `;
+            }
+        }
+
+        function removeMediaItem(index) {
+            URL.revokeObjectURL(uploadedMediaList[index].url);
+            uploadedMediaList.splice(index, 1);
+            renderMediaPlaylist();
+            if (uploadedMediaList.length === 0) {
+                document.getElementById('media-player-box').classList.add('hidden');
+                document.getElementById('media-render-stage').innerHTML = '';
+            } else {
+                playMediaItem(0);
+            }
+        }
+
+        // فعال‌سازی Drag & Drop برای هر دو باکس آپلود
+        function setupDropzones() {
+            const photoZone = document.getElementById('photo-dropzone');
+            const mediaZone = document.getElementById('media-dropzone');
+
+            [photoZone, mediaZone].forEach(zone => {
+                ['dragenter', 'dragover'].forEach(evt => {
+                    zone.addEventListener(evt, e => {
+                        e.preventDefault();
+                        zone.classList.add('ring-2', 'ring-amberbrand-400', 'bg-white');
+                    });
+                });
+                ['dragleave', 'drop'].forEach(evt => {
+                    zone.addEventListener(evt, e => {
+                        e.preventDefault();
+                        zone.classList.remove('ring-2', 'ring-amberbrand-400', 'bg-white');
+                    });
+                });
+            });
+
+            photoZone.addEventListener('drop', e => {
+                if (e.dataTransfer.files.length) {
+                    handlePhotoUpload({ target: { files: e.dataTransfer.files } });
+                }
+            });
+
+            mediaZone.addEventListener('drop', e => {
+                if (e.dataTransfer.files.length) {
+                    handleMediaUpload({ target: { files: e.dataTransfer.files } });
+                }
+            });
+        }
+
+        // راه‌اندازی اولیه پس از بارگذاری صفحه
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderOverviewLists();
+            renderPhasesTable();
+            renderTasksTable();
+            renderMaterialsTable();
+            renderInspectionsGrid();
+            renderTeamGrid();
+            initCharts();
+            setupDropzones();
+        });
+    </script>
+</body>
+</html>
